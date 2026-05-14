@@ -18,6 +18,35 @@ export default function AdminPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showCalendar, setShowCalendar] = useState(false);
 
+  async function actualizarEstadoOperativo(row: any) {
+    setError("");
+
+    const source = row.external ? "external" : row.manual ? "manual" : "stripe";
+
+    const res = await fetch("/api/admin/update-status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": password,
+      },
+      body: JSON.stringify({
+        id: row.id,
+        source,
+        checkin_status: row.checkin_status,
+        cleaning_status: row.cleaning_status,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      setError(data.error || "Error actualizando estado operativo");
+      return;
+    }
+
+    await cargarDatos();
+  }
+
   async function importarReservasExternas() {
     setError("");
 
@@ -436,11 +465,7 @@ export default function AdminPage() {
                   <td className="p-3">
                     <button
                       onClick={() =>
-                        actualizarEstadoOperativo(
-                          r,
-                          "checkin_status",
-                          r.checkin_status
-                        )
+                        actualizarEstadoOperativo(r)
                       }
                       className="rounded-xl bg-slate-900 text-white px-4 py-2 text-sm"
                     >
