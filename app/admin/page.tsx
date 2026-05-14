@@ -271,7 +271,7 @@ export default function AdminPage() {
           </div>
 
           {showCalendar && (
-            <AdminCalendar reservations={unifiedRows} />
+            <AdminCalendar reservations={unifiedRows} adminPassword={password} />
           )}
         </div>
 
