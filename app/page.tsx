@@ -1,4 +1,5 @@
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import HeroCarousel from "@/components/HeroCarousel";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
 
           <nav className="hidden md:flex items-center gap-8 text-sm text-white/85">
             <a href="#apartamento" className="hover:text-white">Apartamento</a>
+            <a href="#servicios" className="hover:text-white">Servicios</a>
             <a href="#ubicacion" className="hover:text-white">Ubicación</a>
             <a href="#galeria" className="hover:text-white">Galería</a>
             <a href="#reservar" className="hover:text-white">Reservar</a>
@@ -26,14 +28,7 @@ export default function Home() {
         </div>
       </header>
       <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="/images/portada.jpg"
-            alt="Apartamento turístico en El Campello"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/45"></div>
-        </div>
+        <HeroCarousel />
 
         <div className="relative z-10 max-w-5xl text-center text-white">
           <p className="uppercase tracking-[0.35em] text-white/80 mb-6">
@@ -92,6 +87,40 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="servicios" className="px-6 py-24 bg-[#f7f4ee]">
+        <div className="max-w-6xl mx-auto">
+          <p className="uppercase tracking-[0.3em] text-slate-500 mb-4">
+            Servicios
+          </p>
+
+          <h2 className="text-4xl md:text-5xl font-semibold mb-10">
+            Servicios del apartamento
+          </h2>
+
+          <div className="grid md:grid-cols-4 gap-5">
+            {[
+              "Aire acondicionado",
+              "WiFi",
+              "Cocina equipada",
+              "Lavadora",
+              "Televisión",
+              "Ropa de cama",
+              "Toallas",
+              "Cerca de la playa",
+              "Paseo marítimo",
+              "Máximo 4 huéspedes",
+              "Pago seguro",
+              "Check-in organizado",
+              "Check-in flexible",
+            ].map((service) => (
+              <div key={service} className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100">
+                <p className="font-medium text-slate-800">✓ {service}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="apartamento" className="px-6 py-24 bg-white">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div className="rounded-[2rem] bg-[#e8e1d6] aspect-[4/3] flex items-center justify-center text-slate-500">
@@ -142,7 +171,13 @@ export default function Home() {
               "IMG_9623.jpg",
               "IMG_9624.jpg",
               "IMG_9625.jpg",
-              "IMG_9626.jpg"
+              "IMG_9626.jpg",
+              "IMG_9627.jpg",
+              "IMG_9628.jpg",
+              "PHOTO-2024-06-17-21-07-17 3.jpg",
+              "PHOTO-2024-06-17-21-07-17 4.jpg",
+              "WhatsApp Image 2024-08-25 at 16.29.30.jpeg",
+              "WhatsApp Image 2024-08-25 at 16.29.31.jpeg"
             ].map((img) => (
               <div key={img} className="rounded-[2rem] overflow-hidden shadow-sm aspect-[4/3] bg-white">
                 <img
