@@ -47,6 +47,35 @@ export default function AdminPage() {
     await cargarDatos();
   }
 
+  async function actualizarDatosHuesped(row: any) {
+    setError("");
+
+    const source = row.external ? "external" : row.manual ? "manual" : "stripe";
+
+    const res = await fetch("/api/admin/update-guest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": password,
+      },
+      body: JSON.stringify({
+        id: row.id,
+        source,
+        guest_name: row.guest_name,
+        guest_phone: row.guest_phone,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      setError(data.error || "Error guardando datos del huésped");
+      return;
+    }
+
+    await cargarDatos();
+  }
+
   async function importarReservasExternas() {
     setError("");
 
@@ -201,6 +230,8 @@ export default function AdminPage() {
       original_cleaning_status: r.cleaning_status || "pending",
       importe: r.amount_total ? `${r.amount_total / 100} €` : "-",
       email: r.customer_email || "-",
+      guest_name: r.customer_name || "",
+      guest_phone: r.customer_phone || "",
       stripe: r.stripe_session_id || "-",
       motivo: "-",
       manual: false,
@@ -226,6 +257,8 @@ export default function AdminPage() {
       original_cleaning_status: e.cleaning_status || "pending",
       importe: e.amount_total ? `${e.amount_total / 100} €` : "-",
       email: e.guest_email || "-",
+      guest_name: e.guest_name || "",
+      guest_phone: e.guest_phone || "",
       stripe: "-",
       motivo: e.summary || e.notes || "Reserva externa",
       manual: false,
@@ -246,6 +279,8 @@ export default function AdminPage() {
       original_cleaning_status: b.cleaning_status || "pending",
       importe: "-",
       email: "-",
+      guest_name: b.customer_name || "",
+      guest_phone: b.customer_phone || "",
       stripe: "-",
       motivo: b.reason || "Bloqueo manual",
       manual: true,
@@ -398,6 +433,8 @@ export default function AdminPage() {
                 <th className="p-3">Check-in Scan</th>
                 <th className="p-3">Importe</th>
                 <th className="p-3">Email</th>
+                <th className="p-3">Huésped</th>
+                <th className="p-3">Teléfono</th>
                 <th className="p-3">Motivo</th>
                 <th className="p-3">Acciones</th>
               </tr>
@@ -562,6 +599,80 @@ export default function AdminPage() {
 
                   <td className="p-3">{r.importe}</td>
                   <td className="p-3">{r.email}</td>
+
+                  <td className="p-3">
+                    <input
+                      type="text"
+                      value={r.guest_name}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (r.external) {
+                          setExternalReservations((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, guest_name: value } : x
+                            )
+                          );
+                        } else if (r.manual) {
+                          setBlocks((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, customer_name: value } : x
+                            )
+                          );
+                        } else {
+                          setReservas((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, customer_name: value } : x
+                            )
+                          );
+                        }
+                      }}
+                      className="rounded-lg border border-slate-300 px-3 py-2 min-w-[160px]"
+                      placeholder="Nombre"
+                    />
+                  </td>
+
+                  <td className="p-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="tel"
+                        value={r.guest_phone}
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          if (r.external) {
+                            setExternalReservations((prev) =>
+                              prev.map((x) =>
+                                x.id === r.id ? { ...x, guest_phone: value } : x
+                              )
+                            );
+                          } else if (r.manual) {
+                            setBlocks((prev) =>
+                              prev.map((x) =>
+                                x.id === r.id ? { ...x, customer_phone: value } : x
+                              )
+                            );
+                          } else {
+                            setReservas((prev) =>
+                              prev.map((x) =>
+                                x.id === r.id ? { ...x, customer_phone: value } : x
+                              )
+                            );
+                          }
+                        }}
+                        className="rounded-lg border border-slate-300 px-3 py-2 min-w-[150px]"
+                        placeholder="+34..."
+                      />
+
+                      <button
+                        onClick={() => actualizarDatosHuesped(r)}
+                        className="rounded-lg bg-slate-900 text-white px-3 py-2 text-sm"
+                      >
+                        Guardar
+                      </button>
+                    </div>
+                  </td>
+
                   <td className="p-3">
                     {r.manual ? (
                       <input
