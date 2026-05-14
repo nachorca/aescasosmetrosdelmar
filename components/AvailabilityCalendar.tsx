@@ -54,12 +54,38 @@ export default function AvailabilityCalendar() {
   const blockedSet = useMemo(() => expandBlockedDates(blocked), [blocked]);
 
   useEffect(() => {
-    fetch("/api/availability")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.ok) setBlocked(data.blocked || []);
-      })
-      .finally(() => setLoading(false));
+    async function loadAvailability() {
+      try {
+        const [availabilityRes, reservasRes] = await Promise.all([
+          fetch("/api/availability"),
+          fetch("/api/reservas"),
+        ]);
+
+        const availabilityData = await availabilityRes.json();
+        const reservasData = await reservasRes.json();
+
+        const icalBlocked = availabilityData.ok
+          ? availabilityData.blocked || []
+          : [];
+
+        const reservasBlocked = reservasData.ok
+          ? (reservasData.reservas || []).map((r: any) => ({
+              source: "stripe",
+              summary: "Reserva confirmada",
+              start: r.check_in,
+              end: r.check_out,
+            }))
+          : [];
+
+        setBlocked([...icalBlocked, ...reservasBlocked]);
+      } catch (error) {
+        console.error("Error cargando disponibilidad:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAvailability();
   }, []);
 
   function handleSelect(dateKey: string, isBlocked: boolean) {
