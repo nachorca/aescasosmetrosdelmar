@@ -34,6 +34,26 @@ function nightsBetween(start: string, end: string) {
   return Math.max(0, Math.round((b.getTime() - a.getTime()) / 86400000));
 }
 
+function getMonthData(base: Date, offset: number) {
+  const date = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+  return {
+    year,
+    month,
+    daysInMonth,
+    startOffset,
+    monthName: date.toLocaleDateString("es-ES", {
+      month: "long",
+      year: "numeric",
+    }),
+  };
+}
+
 export default function AvailabilityCalendar() {
   const [blocked, setBlocked] = useState<BlockedDate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,29 +62,9 @@ export default function AvailabilityCalendar() {
   const [guests, setGuests] = useState(2);
 
   const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const baseMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthsToShow = 12;
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const monthName = currentMonth.toLocaleDateString("es-ES", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-
-  function goPrevMonth() {
-    setCurrentMonth(new Date(year, month - 1, 1));
-  }
-
-  function goNextMonth() {
-    setCurrentMonth(new Date(year, month + 1, 1));
-  }
   const blockedSet = useMemo(() => expandBlockedDates(blocked), [blocked]);
 
   useEffect(() => {
@@ -102,6 +102,17 @@ export default function AvailabilityCalendar() {
     loadAvailability();
   }, []);
 
+  function rangeHasBlocked(start: string, end: string) {
+    const a = new Date(start + "T00:00:00");
+    const b = new Date(end + "T00:00:00");
+
+    for (let d = new Date(a); d < b; d.setDate(d.getDate() + 1)) {
+      if (blockedSet.has(toDateKey(d))) return true;
+    }
+
+    return false;
+  }
+
   function handleSelect(dateKey: string, isBlocked: boolean) {
     if (isBlocked) return;
 
@@ -112,6 +123,13 @@ export default function AvailabilityCalendar() {
     }
 
     if (dateKey <= checkIn) {
+      setCheckIn(dateKey);
+      setCheckOut(null);
+      return;
+    }
+
+    if (rangeHasBlocked(checkIn, dateKey)) {
+      alert("La estancia seleccionada incluye fechas ocupadas. Elige otro rango.");
       setCheckIn(dateKey);
       setCheckOut(null);
       return;
@@ -157,70 +175,71 @@ export default function AvailabilityCalendar() {
         <div>
           <h3 className="text-xl font-semibold">Disponibilidad real</h3>
           <p className="text-sm text-slate-500">
-            Selecciona entrada y salida
+            Calendario completo con disponibilidad actualizada
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={goPrevMonth}
-            className="rounded-xl border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
-          >
-            ←
-          </button>
 
-          <span className="text-sm text-slate-500 capitalize min-w-[140px] text-center">
-            {loading ? "Cargando..." : monthName}
-          </span>
-
-          <button
-            type="button"
-            onClick={goNextMonth}
-            className="rounded-xl border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
-          >
-            →
-          </button>
-        </div>
+        <span className="text-sm text-slate-500">
+          {loading ? "Cargando..." : "12 meses visibles"}
+        </span>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500">
-        {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-          <div key={d}>{d}</div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-2 text-sm">
-        {Array.from({ length: startOffset }).map((_, i) => (
-          <div key={`empty-${i}`} className="p-3 rounded-xl invisible">
-            0
-          </div>
-        ))}
-
-        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-          const dateKey = toDateKey(new Date(year, month, day));
-          const isBlocked = blockedSet.has(dateKey);
-          const selected = dateKey === checkIn || dateKey === checkOut;
-          const inRange =
-            checkIn && checkOut && dateKey > checkIn && dateKey < checkOut;
+      <div className="max-h-[620px] overflow-y-auto pr-2 space-y-8">
+        {Array.from({ length: monthsToShow }, (_, offset) => {
+          const monthData = getMonthData(baseMonth, offset);
 
           return (
-            <button
-              key={day}
-              type="button"
-              disabled={isBlocked}
-              onClick={() => handleSelect(dateKey, isBlocked)}
-              className={`rounded-xl p-3 text-center transition ${
-                selected
-                  ? "bg-slate-900 text-white font-semibold"
-                  : inRange
-                  ? "bg-slate-100 text-slate-900"
-                  : isBlocked
-                  ? "bg-slate-200 text-slate-400 line-through cursor-not-allowed"
-                  : "bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100"
-              }`}
-            >
-              {day}
-            </button>
+            <div key={`${monthData.year}-${monthData.month}`}>
+              <h4 className="mb-3 font-semibold capitalize text-slate-800">
+                {monthData.monthName}
+              </h4>
+
+              <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500">
+                {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+                  <div key={d}>{d}</div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-2 text-sm">
+                {Array.from({ length: monthData.startOffset }).map((_, i) => (
+                  <div key={`empty-${i}`} className="p-3 rounded-xl invisible">
+                    0
+                  </div>
+                ))}
+
+                {Array.from({ length: monthData.daysInMonth }, (_, i) => i + 1).map((day) => {
+                  const dateKey = toDateKey(
+                    new Date(monthData.year, monthData.month, day)
+                  );
+
+                  const isPast = dateKey < toDateKey(today);
+                  const isBlocked = blockedSet.has(dateKey) || isPast;
+                  const selected = dateKey === checkIn || dateKey === checkOut;
+                  const inRange =
+                    checkIn && checkOut && dateKey > checkIn && dateKey < checkOut;
+
+                  return (
+                    <button
+                      key={dateKey}
+                      type="button"
+                      disabled={isBlocked}
+                      onClick={() => handleSelect(dateKey, isBlocked)}
+                      className={`rounded-xl p-3 text-center transition ${
+                        selected
+                          ? "bg-slate-900 text-white font-semibold"
+                          : inRange
+                          ? "bg-slate-100 text-slate-900"
+                          : isBlocked
+                          ? "bg-slate-200 text-slate-400 line-through cursor-not-allowed"
+                          : "bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100"
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
@@ -237,9 +256,7 @@ export default function AvailabilityCalendar() {
       </div>
 
       <div className="mt-8 rounded-2xl bg-[#f7f4ee] p-6 text-left">
-        <h4 className="font-semibold mb-5 text-xl">
-          Solicitud de reserva
-        </h4>
+        <h4 className="font-semibold mb-5 text-xl">Solicitud de reserva</h4>
 
         <div className="grid md:grid-cols-4 gap-4 text-sm text-slate-700 mb-6">
           <div>
@@ -265,7 +282,7 @@ export default function AvailabilityCalendar() {
               onChange={(e) => setGuests(Number(e.target.value))}
               className="rounded-xl border border-slate-300 px-3 py-2 bg-white"
             >
-              {[1,2,3,4].map((g) => (
+              {[1, 2, 3, 4].map((g) => (
                 <option key={g} value={g}>
                   {g} huésped{g > 1 ? "es" : ""}
                 </option>
