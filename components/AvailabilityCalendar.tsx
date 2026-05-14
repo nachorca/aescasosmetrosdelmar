@@ -87,6 +87,26 @@ export default function AvailabilityCalendar() {
   const subtotal = nights * pricePerNight;
   const total = nights ? subtotal + cleaningFee : 0;
 
+  async function handlePayment() {
+    if (!checkIn || !checkOut || !total) return;
+
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        checkIn,
+        checkOut,
+        guests,
+        amount: total * 100,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.ok && data.url) {
+      window.location.href = data.url;
+    }
+  }
+
   const whatsappText = encodeURIComponent(
     `Hola, quiero consultar disponibilidad para el apartamento A escasos metros del mar.\n\nEntrada: ${checkIn || "-"}\nSalida: ${checkOut || "-"}\nNoches: ${nights || "-"}`
   );
@@ -207,18 +227,33 @@ export default function AvailabilityCalendar() {
           </div>
         </div>
 
-        <a
-          href={`https://wa.me/34665691462?text=${whatsappText}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`inline-flex justify-center rounded-2xl px-6 py-3 font-medium ${
-            checkIn && checkOut
-              ? "bg-green-600 text-white"
-              : "bg-slate-200 text-slate-400 pointer-events-none"
-          }`}
-        >
-          Solicitar reserva por WhatsApp
-        </a>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={handlePayment}
+            disabled={!checkIn || !checkOut}
+            className={`inline-flex justify-center rounded-2xl px-6 py-3 font-medium ${
+              checkIn && checkOut
+                ? "bg-slate-900 text-white"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+            }`}
+          >
+            Pagar reserva segura
+          </button>
+
+          <a
+            href={`https://wa.me/34665691462?text=${whatsappText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex justify-center rounded-2xl px-6 py-3 font-medium ${
+              checkIn && checkOut
+                ? "bg-green-600 text-white"
+                : "bg-slate-200 text-slate-400 pointer-events-none"
+            }`}
+          >
+            Consultar por WhatsApp
+          </a>
+        </div>
       </div>
     </div>
   );
