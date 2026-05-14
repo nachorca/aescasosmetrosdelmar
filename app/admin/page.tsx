@@ -56,12 +56,14 @@ export default function AdminPage() {
     const blocksRes = await fetch("/api/manual-blocks");
     const blocksData = await blocksRes.json();
 
-    const externalRes = await fetch("/api/availability");
+    const externalRes = await fetch("/api/admin/external-reservations", {
+      headers: { "x-admin-password": password },
+    });
     const externalData = await externalRes.json();
 
     setReservas(reservasData.reservas || []);
     setBlocks(blocksData.blocks || []);
-    setExternalReservations(externalData.ok ? externalData.blocked || [] : []);
+    setExternalReservations(externalData.ok ? externalData.reservas || [] : []);
     setIsAdmin(true);
   }
 
@@ -163,23 +165,23 @@ export default function AdminPage() {
       manual: false,
       external: false,
     })),
-    ...externalReservations.map((e, index) => ({
-      id: `${e.source}-${e.start}-${e.end}-${index}`,
+    ...externalReservations.map((e) => ({
+      id: e.id,
       tipo:
         e.source === "airbnb"
           ? "Reserva Airbnb"
           : e.source === "booking"
           ? "Reserva Booking"
           : "Reserva externa",
-      entrada: e.start,
-      salida: e.end,
-      huespedes: "-",
+      entrada: e.check_in,
+      salida: e.check_out,
+      huespedes: e.guests || "-",
       pago: "-",
-      estado: "confirmed",
-      importe: "-",
-      email: "-",
+      estado: e.status || "confirmed",
+      importe: e.amount_total ? `${e.amount_total / 100} €` : "-",
+      email: e.guest_email || "-",
       stripe: "-",
-      motivo: e.summary || "Reserva externa",
+      motivo: e.summary || e.notes || "Reserva externa",
       manual: false,
       external: true,
     })),

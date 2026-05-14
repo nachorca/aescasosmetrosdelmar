@@ -14,6 +14,33 @@ function formatDate(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
+function overlapsOrTouches(a: any, b: any) {
+  return a.source === b.source && a.check_in <= b.check_out && a.check_out >= b.check_in;
+}
+
+function normalizeEvents(events: any[]) {
+  const sorted = events.sort((a, b) =>
+    `${a.source}-${a.check_in}`.localeCompare(`${b.source}-${b.check_in}`)
+  );
+
+  const merged: any[] = [];
+
+  for (const event of sorted) {
+    const last = merged[merged.length - 1];
+
+    if (last && overlapsOrTouches(last, event)) {
+      last.check_in = last.check_in < event.check_in ? last.check_in : event.check_in;
+      last.check_out = last.check_out > event.check_out ? last.check_out : event.check_out;
+      last.summary = last.summary || event.summary;
+      last.external_uid = `${last.source}-${last.check_in}-${last.check_out}`;
+    } else {
+      merged.push({ ...event });
+    }
+  }
+
+  return merged;
+}
+
 async function readCalendar(url?: string, source = "unknown") {
   if (!url) return [];
 
@@ -26,14 +53,15 @@ async function readCalendar(url?: string, source = "unknown") {
 
   return events.map((event) => {
     const vevent = new ICAL.Event(event);
+    const checkIn = formatDate(vevent.startDate.toJSDate());
+    const checkOut = formatDate(vevent.endDate.toJSDate());
+
     return {
       source,
-      external_uid: `${source}-${vevent.uid || vevent.summary || ""}-${formatDate(
-        vevent.startDate.toJSDate()
-      )}`,
+      external_uid: `${source}-${checkIn}-${checkOut}`,
       summary: vevent.summary || "Reserva externa",
-      check_in: formatDate(vevent.startDate.toJSDate()),
-      check_out: formatDate(vevent.endDate.toJSDate()),
+      check_in: checkIn,
+      check_out: checkOut,
       status: "confirmed",
     };
   });
@@ -47,7 +75,9 @@ export async function POST(req: Request) {
   const airbnb = await readCalendar(process.env.AIRBNB_ICAL_URL, "airbnb");
   const booking = await readCalendar(process.env.BOOKING_ICAL_URL, "booking");
 
-  const rows = [...airbnb, ...booking];
+  const rows = normalizeEvents([...airbnb, ...booking]);
+
+  await supabase.from("external_reservations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
   if (!rows.length) {
     return Response.json({ ok: true, imported: 0 });
