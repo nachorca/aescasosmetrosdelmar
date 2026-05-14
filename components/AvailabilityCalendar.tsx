@@ -55,6 +55,8 @@ export default function AvailabilityCalendar() {
   });
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   function goPrevMonth() {
     setCurrentMonth(new Date(year, month - 1, 1));
@@ -121,7 +123,7 @@ export default function AvailabilityCalendar() {
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
 
   const pricePerNight = 130;
-  const cleaningFee = 45;
+  const cleaningFee = 75;
   const subtotal = nights * pricePerNight;
   const total = nights ? subtotal + cleaningFee : 0;
 
@@ -188,6 +190,12 @@ export default function AvailabilityCalendar() {
       </div>
 
       <div className="grid grid-cols-7 gap-2 text-sm">
+        {Array.from({ length: startOffset }).map((_, i) => (
+          <div key={`empty-${i}`} className="p-3 rounded-xl invisible">
+            0
+          </div>
+        ))}
+
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
           const dateKey = toDateKey(new Date(year, month, day));
           const isBlocked = blockedSet.has(dateKey);
@@ -257,7 +265,7 @@ export default function AvailabilityCalendar() {
               onChange={(e) => setGuests(Number(e.target.value))}
               className="rounded-xl border border-slate-300 px-3 py-2 bg-white"
             >
-              {[1,2,3,4,5,6].map((g) => (
+              {[1,2,3,4].map((g) => (
                 <option key={g} value={g}>
                   {g} huésped{g > 1 ? "es" : ""}
                 </option>
