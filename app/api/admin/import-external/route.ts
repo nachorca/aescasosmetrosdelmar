@@ -15,7 +15,7 @@ function formatDate(d: Date) {
 }
 
 function overlapsOrTouches(a: any, b: any) {
-  return a.source === b.source && a.check_in <= b.check_out && a.check_out >= b.check_in;
+  return a.source === b.source && a.check_in < b.check_out && a.check_out > b.check_in;
 }
 
 function normalizeEvents(events: any[]) {

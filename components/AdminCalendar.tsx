@@ -149,6 +149,7 @@ export default function AdminCalendar({
                   );
 
                   const dayReservations = getReservationsForDate(dateKey);
+                  const checkOutsToday = reservations.filter((r) => r.salida === dateKey);
                   const price = prices[dateKey] ?? 130;
 
                   return (
@@ -180,6 +181,12 @@ export default function AdminCalendar({
                           );
                         })}
                       </div>
+
+                      {checkOutsToday.length > 0 && (
+                        <div className="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-[11px] text-slate-600">
+                          Salida 10:00
+                        </div>
+                      )}
 
                       <div className="mt-3">
                         <label className="block text-[11px] mb-1 text-slate-500">
