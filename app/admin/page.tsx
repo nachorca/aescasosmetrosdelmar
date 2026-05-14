@@ -442,7 +442,30 @@ export default function AdminPage() {
 
                   <td className="p-3">
                     <select
-                      defaultValue={r.checkin_status}
+                      value={r.checkin_status}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (r.external) {
+                          setExternalReservations((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, checkin_status: value } : x
+                            )
+                          );
+                        } else if (r.manual) {
+                          setBlocks((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, checkin_status: value } : x
+                            )
+                          );
+                        } else {
+                          setReservas((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, checkin_status: value } : x
+                            )
+                          );
+                        }
+                      }}
                       className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
                     >
                       <option value="pending">Pendiente</option>
@@ -453,7 +476,30 @@ export default function AdminPage() {
 
                   <td className="p-3">
                     <select
-                      defaultValue={r.cleaning_status}
+                      value={r.cleaning_status}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (r.external) {
+                          setExternalReservations((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, cleaning_status: value } : x
+                            )
+                          );
+                        } else if (r.manual) {
+                          setBlocks((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, cleaning_status: value } : x
+                            )
+                          );
+                        } else {
+                          setReservas((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id ? { ...x, cleaning_status: value } : x
+                            )
+                          );
+                        }
+                      }}
                       className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
                     >
                       <option value="pending">Pendiente</option>
