@@ -163,7 +163,7 @@ export default function Home() {
               El Campello, paseo marítimo y Mediterráneo
             </h2>
             <p className="text-lg text-slate-700 mb-6">
-              Una ubicación ideal para disfrutar de la playa, restaurantes, paseos junto al mar y conexión con Alicante.
+              El apartamento se encuentra en El Campello, una de las zonas costeras más agradables de Alicante, ideal para disfrutar del mar Mediterráneo, el paseo marítimo, restaurantes, playa y estancias tranquilas junto al mar.
             </p>
             <ul className="space-y-3 text-slate-700">
               <li>✓ Paseo marítimo de El Campello</li>
@@ -173,8 +173,14 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="rounded-[2rem] bg-[#e8e1d6] aspect-[4/3] flex items-center justify-center text-slate-500">
-            Aquí irá el mapa de ubicación
+          <div className="rounded-[2rem] overflow-hidden shadow-xl aspect-[4/3]">
+            <iframe
+              src="https://www.google.com/maps?q=El%20Campello%20Alicante%20paseo%20maritimo&output=embed"
+              className="w-full h-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Ubicación aproximada en El Campello"
+            ></iframe>
           </div>
         </div>
       </section>
@@ -214,7 +220,7 @@ export default function Home() {
         </div>
       </section>
       <a
-        href="https://wa.me/"
+        href="https://wa.me/34665691462?text=Hola%2C%20quiero%20consultar%20disponibilidad%20del%20apartamento%20A%20escasos%20metros%20del%20mar"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-5 py-4 rounded-full shadow-xl font-medium"
