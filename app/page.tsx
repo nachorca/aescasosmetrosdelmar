@@ -1,4 +1,5 @@
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import { propertyConfig } from "@/lib/property";
 import HeroCarousel from "@/components/HeroCarousel";
 import GalleryGrid from "@/components/GalleryGrid";
 
@@ -8,7 +9,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/25 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-white">
           <a href="#" className="font-semibold tracking-wide">
-            A escasos metros del mar
+            {propertyConfig.name}
           </a>
 
           <nav className="hidden md:flex items-center gap-8 text-sm text-white/85">
@@ -33,15 +34,15 @@ export default function Home() {
 
         <div className="relative z-10 max-w-5xl text-center text-white">
           <p className="uppercase tracking-[0.35em] text-white/80 mb-6">
-            El Campello · Alicante
+            {propertyConfig.city} · {propertyConfig.province}
           </p>
 
           <h1 className="text-5xl md:text-8xl font-semibold mb-6">
-            A escasos metros del mar
+            {propertyConfig.name}
           </h1>
 
           <p className="text-xl md:text-2xl text-white/90 mb-10">
-            Apartamento turístico junto al paseo marítimo de El Campello.
+            Apartamento turístico junto al paseo marítimo de {propertyConfig.city}.
           </p>
 
           <div className="flex gap-4 justify-center mb-16">
@@ -75,9 +76,9 @@ export default function Home() {
       <section className="px-6 py-16 bg-[#f7f4ee]">
         <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-4">
           {[
-            ["Playa", "A escasos metros del mar"],
-            ["Ubicación", "Paseo marítimo de El Campello"],
-            ["Conexión", "TRAM y Alicante cerca"],
+            ["Playa", "{propertyConfig.name}"],
+            ["Ubicación", "Paseo marítimo de {propertyConfig.city}"],
+            ["Conexión", "TRAM y {propertyConfig.province} cerca"],
             ["Reserva", "Pago seguro y disponibilidad"]
           ].map(([title, text]) => (
             <div key={title} className="bg-white rounded-3xl p-6 shadow-sm text-center">
@@ -109,26 +110,26 @@ export default function Home() {
               Ubicación
             </p>
             <h2 className="text-4xl md:text-5xl font-semibold mb-6">
-              El Campello, paseo marítimo y Mediterráneo
+              {propertyConfig.city}, paseo marítimo y Mediterráneo
             </h2>
             <p className="text-lg text-slate-700 mb-6">
-              El apartamento se encuentra en El Campello, una de las zonas costeras más agradables de Alicante, ideal para disfrutar del mar Mediterráneo, el paseo marítimo, restaurantes, playa y estancias tranquilas junto al mar.
+              El apartamento se encuentra en {propertyConfig.city}, una de las zonas costeras más agradables de {propertyConfig.province}, ideal para disfrutar del mar Mediterráneo, el paseo marítimo, restaurantes, playa y estancias tranquilas junto al mar.
             </p>
             <ul className="space-y-3 text-slate-700">
-              <li>✓ Paseo marítimo de El Campello</li>
+              <li>✓ Paseo marítimo de {propertyConfig.city}</li>
               <li>✓ Playa y restaurantes cercanos</li>
-              <li>✓ Conexión con Alicante mediante TRAM</li>
+              <li>✓ Conexión con {propertyConfig.province} mediante TRAM</li>
               <li>✓ Ideal para vacaciones o estancias temporales</li>
             </ul>
           </div>
 
           <div className="rounded-[2rem] overflow-hidden shadow-xl aspect-[4/3]">
             <iframe
-              src="https://www.google.com/maps?q=El%20Campello%20Alicante%20paseo%20maritimo&output=embed"
+              src="https://www.google.com/maps?q=El%20Campello%20{propertyConfig.province}%20paseo%20maritimo&output=embed"
               className="w-full h-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Ubicación aproximada en El Campello"
+              title="Ubicación aproximada en {propertyConfig.city}"
             ></iframe>
           </div>
         </div>
