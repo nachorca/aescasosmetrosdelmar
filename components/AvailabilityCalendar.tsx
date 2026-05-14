@@ -42,15 +42,27 @@ export default function AvailabilityCalendar() {
   const [guests, setGuests] = useState(2);
 
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
 
-  const monthName = today.toLocaleDateString("es-ES", {
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const monthName = currentMonth.toLocaleDateString("es-ES", {
     month: "long",
     year: "numeric",
   });
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  function goPrevMonth() {
+    setCurrentMonth(new Date(year, month - 1, 1));
+  }
+
+  function goNextMonth() {
+    setCurrentMonth(new Date(year, month + 1, 1));
+  }
   const blockedSet = useMemo(() => expandBlockedDates(blocked), [blocked]);
 
   useEffect(() => {
@@ -146,9 +158,27 @@ export default function AvailabilityCalendar() {
             Selecciona entrada y salida
           </p>
         </div>
-        <span className="text-sm text-slate-500 capitalize">
-          {loading ? "Cargando..." : monthName}
-        </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={goPrevMonth}
+            className="rounded-xl border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+          >
+            ←
+          </button>
+
+          <span className="text-sm text-slate-500 capitalize min-w-[140px] text-center">
+            {loading ? "Cargando..." : monthName}
+          </span>
+
+          <button
+            type="button"
+            onClick={goNextMonth}
+            className="rounded-xl border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+          >
+            →
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500">
