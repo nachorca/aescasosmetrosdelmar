@@ -190,6 +190,7 @@ export default function AdminPage() {
       estado: r.status,
       checkin_status: r.checkin_status || "pending",
       cleaning_status: r.cleaning_status || "pending",
+      checkinscan_status: r.checkinscan_status || "not_sent",
       original_checkin_status: r.checkin_status || "pending",
       original_cleaning_status: r.cleaning_status || "pending",
       importe: r.amount_total ? `${r.amount_total / 100} €` : "-",
@@ -214,6 +215,7 @@ export default function AdminPage() {
       estado: e.status || "confirmed",
       checkin_status: e.checkin_status || "pending",
       cleaning_status: e.cleaning_status || "pending",
+      checkinscan_status: e.checkinscan_status || "not_sent",
       original_checkin_status: e.checkin_status || "pending",
       original_cleaning_status: e.cleaning_status || "pending",
       importe: e.amount_total ? `${e.amount_total / 100} €` : "-",
@@ -233,6 +235,7 @@ export default function AdminPage() {
       estado: "confirmed",
       checkin_status: b.checkin_status || "pending",
       cleaning_status: b.cleaning_status || "pending",
+      checkinscan_status: b.checkinscan_status || "not_sent",
       original_checkin_status: b.checkin_status || "pending",
       original_cleaning_status: b.cleaning_status || "pending",
       importe: "-",
@@ -386,6 +389,7 @@ export default function AdminPage() {
                 <th className="p-3">Estado</th>
                 <th className="p-3">Check-in</th>
                 <th className="p-3">Limpieza</th>
+                <th className="p-3">Check-in Scan</th>
                 <th className="p-3">Importe</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Motivo</th>
@@ -506,6 +510,26 @@ export default function AdminPage() {
                       <option value="cleaning">Limpiando</option>
                       <option value="ready">Listo</option>
                     </select>
+                  </td>
+
+                  <td className="p-3">
+                    <div className="flex flex-col gap-2">
+                      {r.checkinscan_status === "not_sent" ? (
+                        <button
+                          className="rounded-xl bg-blue-600 text-white px-3 py-2 text-sm"
+                        >
+                          Enviar
+                        </button>
+                      ) : r.checkinscan_status === "sent" ? (
+                        <span className="rounded-lg bg-amber-100 text-amber-700 px-3 py-2 text-sm">
+                          Enviado
+                        </span>
+                      ) : (
+                        <span className="rounded-lg bg-emerald-100 text-emerald-700 px-3 py-2 text-sm">
+                          Completado
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   <td className="p-3">
