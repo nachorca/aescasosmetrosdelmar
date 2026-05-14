@@ -5,6 +5,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function isAdmin(req: Request) {
+  return req.headers.get("x-admin-password") === process.env.ADMIN_PASSWORD;
+}
+
 export async function GET() {
   const { data, error } = await supabase
     .from("manual_blocks")
@@ -13,33 +17,18 @@ export async function GET() {
     .order("start_date", { ascending: true });
 
   if (error) {
-    return Response.json(
-      { ok: false, error: error.message },
-      { status: 500 }
-    );
+    return Response.json({ ok: false, error: error.message }, { status: 500 });
   }
 
-  return Response.json({
-    ok: true,
-    blocks: data || [],
-  });
+  return Response.json({ ok: true, blocks: data || [] });
 }
 
 export async function POST(req: Request) {
-  const auth = req.headers.get("x-admin-password");
-
-  if (!auth || auth !== process.env.ADMIN_PASSWORD) {
+  if (!isAdmin(req)) {
     return Response.json({ ok: false, error: "No autorizado" }, { status: 401 });
   }
 
   const body = await req.json();
-
-  if (!body.start_date || !body.end_date) {
-    return Response.json(
-      { ok: false, error: "Faltan fechas" },
-      { status: 400 }
-    );
-  }
 
   const { data, error } = await supabase
     .from("manual_blocks")
@@ -57,4 +46,48 @@ export async function POST(req: Request) {
   }
 
   return Response.json({ ok: true, block: data });
+}
+
+export async function PUT(req: Request) {
+  if (!isAdmin(req)) {
+    return Response.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
+  const body = await req.json();
+
+  const { data, error } = await supabase
+    .from("manual_blocks")
+    .update({
+      start_date: body.start_date,
+      end_date: body.end_date,
+      reason: body.reason || "Bloqueo manual",
+    })
+    .eq("id", body.id)
+    .select()
+    .single();
+
+  if (error) {
+    return Response.json({ ok: false, error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ ok: true, block: data });
+}
+
+export async function DELETE(req: Request) {
+  if (!isAdmin(req)) {
+    return Response.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
+  const body = await req.json();
+
+  const { error } = await supabase
+    .from("manual_blocks")
+    .update({ active: false })
+    .eq("id", body.id);
+
+  if (error) {
+    return Response.json({ ok: false, error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ ok: true });
 }
