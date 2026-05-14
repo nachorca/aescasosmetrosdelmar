@@ -29,6 +29,26 @@ function getColor(tipo: string) {
   return "bg-emerald-600 text-white";
 }
 
+function getMonthData(base: Date, offset: number) {
+  const date = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+  return {
+    year,
+    month,
+    daysInMonth,
+    startOffset,
+    monthName: date.toLocaleDateString("es-ES", {
+      month: "long",
+      year: "numeric",
+    }),
+  };
+}
+
 export default function AdminCalendar({
   reservations,
   adminPassword,
@@ -37,23 +57,11 @@ export default function AdminCalendar({
   adminPassword: string;
 }) {
   const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const baseMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthsToShow = 18;
+
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [savingDate, setSavingDate] = useState("");
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const monthName = currentMonth.toLocaleDateString("es-ES", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   useEffect(() => {
     fetch("/api/prices")
@@ -69,18 +77,6 @@ export default function AdminCalendar({
         setPrices(map);
       });
   }, []);
-
-  function prevMonth() {
-    setCurrentMonth(new Date(year, month - 1, 1));
-  }
-
-  function nextMonth() {
-    setCurrentMonth(new Date(year, month + 1, 1));
-  }
-
-  function goToday() {
-    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-  }
 
   function getReservation(dateKey: string) {
     return reservations.find((r) => overlaps(dateKey, r.entrada, r.salida));
@@ -111,100 +107,87 @@ export default function AdminCalendar({
 
   return (
     <div className="rounded-3xl bg-white border border-slate-200 p-5">
-      <div className="sticky top-0 z-10 bg-white pb-4 mb-4 border-b border-slate-100">
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={prevMonth}
-            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-100"
-          >
-            ← Mes anterior
-          </button>
+      <div className="max-h-[720px] overflow-y-auto pr-2 space-y-10">
+        {Array.from({ length: monthsToShow }, (_, offset) => {
+          const monthData = getMonthData(baseMonth, offset);
 
-          <div className="text-center">
-            <h3 className="text-xl font-semibold capitalize">{monthName}</h3>
-            <button
-              type="button"
-              onClick={goToday}
-              className="text-xs text-slate-500 hover:text-slate-900 mt-1"
-            >
-              Volver al mes actual
-            </button>
-          </div>
+          return (
+            <div key={`${monthData.year}-${monthData.month}`}>
+              <h3 className="text-xl font-semibold capitalize mb-4 sticky top-0 bg-white z-20 py-3 border-b border-slate-100">
+                {monthData.monthName}
+              </h3>
 
-          <button
-            type="button"
-            onClick={nextMonth}
-            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-100"
-          >
-            Mes siguiente →
-          </button>
-        </div>
-      </div>
-
-      <div className="max-h-[720px] overflow-y-auto pr-2">
-        <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500 sticky top-0 bg-white z-10 py-2">
-          {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-            <div key={d}>{d}</div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7 gap-2 text-sm">
-          {Array.from({ length: startOffset }).map((_, i) => (
-            <div key={`empty-${i}`} className="min-h-[130px]" />
-          ))}
-
-          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-            const dateKey = toDateKey(new Date(year, month, day));
-            const reservation = getReservation(dateKey);
-            const price = prices[dateKey] ?? 130;
-
-            return (
-              <div
-                key={dateKey}
-                className={`rounded-2xl p-3 min-h-[130px] border ${
-                  reservation
-                    ? `${getColor(reservation.tipo)} border-transparent`
-                    : "bg-slate-50 border-slate-200"
-                }`}
-              >
-                <div className="font-semibold mb-2">{day}</div>
-
-                {reservation ? (
-                  <div className="text-xs mb-2">
-                    <div className="font-medium">{reservation.tipo}</div>
-                    <div className="opacity-90 mt-1">
-                      {reservation.entrada} → {reservation.salida}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-xs text-slate-400 mb-2">Disponible</div>
-                )}
-
-                <div className="mt-2">
-                  <label className="block text-[11px] mb-1 opacity-80">
-                    Precio noche
-                  </label>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) =>
-                      setPrices((prev) => ({
-                        ...prev,
-                        [dateKey]: Number(e.target.value),
-                      }))
-                    }
-                    onBlur={(e) => savePrice(dateKey, Number(e.target.value))}
-                    className="w-full rounded-lg border border-slate-300 px-2 py-1 text-slate-900"
-                  />
-                  {savingDate === dateKey && (
-                    <p className="text-[11px] mt-1">Guardando...</p>
-                  )}
-                </div>
+              <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500 sticky top-[58px] bg-white z-10 py-2">
+                {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+                  <div key={d}>{d}</div>
+                ))}
               </div>
-            );
-          })}
-        </div>
+
+              <div className="grid grid-cols-7 gap-2 text-sm">
+                {Array.from({ length: monthData.startOffset }).map((_, i) => (
+                  <div key={`empty-${i}`} className="min-h-[130px]" />
+                ))}
+
+                {Array.from({ length: monthData.daysInMonth }, (_, i) => i + 1).map((day) => {
+                  const dateKey = toDateKey(
+                    new Date(monthData.year, monthData.month, day)
+                  );
+                  const reservation = getReservation(dateKey);
+                  const price = prices[dateKey] ?? 130;
+
+                  return (
+                    <div
+                      key={dateKey}
+                      className={`rounded-2xl p-3 min-h-[130px] border ${
+                        reservation
+                          ? `${getColor(reservation.tipo)} border-transparent`
+                          : "bg-slate-50 border-slate-200"
+                      }`}
+                    >
+                      <div className="font-semibold mb-2">{day}</div>
+
+                      {reservation ? (
+                        <div className="text-xs mb-2">
+                          <div className="font-medium">{reservation.tipo}</div>
+                          <div className="opacity-90 mt-1">
+                            {reservation.entrada} → {reservation.salida}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-slate-400 mb-2">
+                          Disponible
+                        </div>
+                      )}
+
+                      <div className="mt-2">
+                        <label className="block text-[11px] mb-1 opacity-80">
+                          Precio noche
+                        </label>
+                        <input
+                          type="number"
+                          value={price}
+                          onChange={(e) =>
+                            setPrices((prev) => ({
+                              ...prev,
+                              [dateKey]: Number(e.target.value),
+                            }))
+                          }
+                          onBlur={(e) =>
+                            savePrice(dateKey, Number(e.target.value))
+                          }
+                          className="w-full rounded-lg border border-slate-300 px-2 py-1 text-slate-900"
+                        />
+                        {savingDate === dateKey && (
+                          <p className="text-[11px] mt-1">Guardando...</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
