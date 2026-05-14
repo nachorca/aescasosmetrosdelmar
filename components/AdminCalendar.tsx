@@ -15,18 +15,10 @@ type DailyPrice = {
 };
 
 function toDateKey(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-function overlaps(date: string, start: string, end: string) {
-  return date >= start && date < end;
-}
-
-function getColor(tipo: string) {
-  if (tipo.includes("Airbnb")) return "bg-pink-500 text-white";
-  if (tipo.includes("Booking")) return "bg-blue-500 text-white";
-  if (tipo.includes("manual")) return "bg-amber-500 text-white";
-  return "bg-emerald-600 text-white";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function getMonthData(base: Date, offset: number) {
@@ -47,6 +39,27 @@ function getMonthData(base: Date, offset: number) {
       year: "numeric",
     }),
   };
+}
+
+function getColor(tipo: string) {
+  if (tipo.includes("Airbnb")) return "bg-pink-500";
+  if (tipo.includes("Booking")) return "bg-blue-500";
+  if (tipo.includes("manual")) return "bg-amber-500";
+  return "bg-emerald-600";
+}
+
+function isInside(date: string, start: string, end: string) {
+  return date >= start && date < end;
+}
+
+function isStart(date: string, start: string) {
+  return date === start;
+}
+
+function addDays(dateKey: string, days: number) {
+  const d = new Date(dateKey + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return toDateKey(d);
 }
 
 export default function AdminCalendar({
@@ -78,8 +91,8 @@ export default function AdminCalendar({
       });
   }, []);
 
-  function getReservation(dateKey: string) {
-    return reservations.find((r) => overlaps(dateKey, r.entrada, r.salida));
+  function getReservationsForDate(dateKey: string) {
+    return reservations.filter((r) => isInside(dateKey, r.entrada, r.salida));
   }
 
   async function savePrice(date: string, price: number) {
@@ -117,50 +130,59 @@ export default function AdminCalendar({
                 {monthData.monthName}
               </h3>
 
-              <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500 sticky top-[58px] bg-white z-10 py-2">
-                {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-                  <div key={d}>{d}</div>
+              <div className="grid grid-cols-7 gap-0 text-sm text-center mb-0 text-slate-500 sticky top-[58px] bg-white z-10 border-b border-slate-200">
+                {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((d) => (
+                  <div key={d} className="py-3 border-r border-slate-200 last:border-r-0">
+                    {d}
+                  </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-2 text-sm">
+              <div className="grid grid-cols-7 gap-0 text-sm border-l border-t border-slate-200">
                 {Array.from({ length: monthData.startOffset }).map((_, i) => (
-                  <div key={`empty-${i}`} className="min-h-[130px]" />
+                  <div key={`empty-${i}`} className="min-h-[145px] border-r border-b border-slate-200 bg-slate-50" />
                 ))}
 
                 {Array.from({ length: monthData.daysInMonth }, (_, i) => i + 1).map((day) => {
                   const dateKey = toDateKey(
                     new Date(monthData.year, monthData.month, day)
                   );
-                  const reservation = getReservation(dateKey);
+
+                  const dayReservations = getReservationsForDate(dateKey);
                   const price = prices[dateKey] ?? 130;
 
                   return (
                     <div
                       key={dateKey}
-                      className={`rounded-2xl p-3 min-h-[130px] border ${
-                        reservation
-                          ? `${getColor(reservation.tipo)} border-transparent`
-                          : "bg-slate-50 border-slate-200"
-                      }`}
+                      className="relative min-h-[145px] border-r border-b border-slate-200 bg-white p-2 overflow-hidden"
                     >
-                      <div className="font-semibold mb-2">{day}</div>
+                      <div className="font-semibold text-slate-900 mb-2">{day}</div>
 
-                      {reservation ? (
-                        <div className="text-xs mb-2">
-                          <div className="font-medium">{reservation.tipo}</div>
-                          <div className="opacity-90 mt-1">
-                            {reservation.entrada} → {reservation.salida}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-xs text-slate-400 mb-2">
-                          Disponible
-                        </div>
-                      )}
+                      <div className="space-y-1 min-h-[42px]">
+                        {dayReservations.map((r) => {
+                          const startsHere = isStart(dateKey, r.entrada);
+                          const previousDate = addDays(dateKey, -1);
+                          const continuesFromPrevious = isInside(previousDate, r.entrada, r.salida);
 
-                      <div className="mt-2">
-                        <label className="block text-[11px] mb-1 opacity-80">
+                          return (
+                            <div
+                              key={`${r.id}-${dateKey}`}
+                              className={`${getColor(r.tipo)} h-7 text-white text-xs flex items-center px-2 ${
+                                startsHere ? "rounded-l-full" : ""
+                              } ${
+                                !isInside(addDays(dateKey, 1), r.entrada, r.salida)
+                                  ? "rounded-r-full"
+                                  : ""
+                              } ${continuesFromPrevious ? "-ml-3" : ""}`}
+                            >
+                              {startsHere ? r.tipo.replace("Reserva ", "") : ""}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="block text-[11px] mb-1 text-slate-500">
                           Precio noche
                         </label>
                         <input
@@ -178,7 +200,7 @@ export default function AdminCalendar({
                           className="w-full rounded-lg border border-slate-300 px-2 py-1 text-slate-900"
                         />
                         {savingDate === dateKey && (
-                          <p className="text-[11px] mt-1">Guardando...</p>
+                          <p className="text-[11px] mt-1 text-slate-500">Guardando...</p>
                         )}
                       </div>
                     </div>
