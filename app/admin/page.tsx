@@ -17,6 +17,27 @@ export default function AdminPage() {
   const [blockReason, setBlockReason] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
 
+  async function importarReservasExternas() {
+    setError("");
+
+    const res = await fetch("/api/admin/import-external", {
+      method: "POST",
+      headers: {
+        "x-admin-password": password,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      setError(data.error || "Error importando reservas externas");
+      return;
+    }
+
+    alert(`Importación completada. Reservas procesadas: ${data.imported}`);
+    await cargarDatos();
+  }
+
   async function cargarDatos() {
     setError("");
 
@@ -220,6 +241,23 @@ export default function AdminPage() {
             {error}
           </div>
         )}
+
+        <div className="rounded-2xl bg-white p-5 border border-slate-200 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <h2 className="text-xl font-semibold">Importar reservas externas</h2>
+
+            <button
+              onClick={importarReservasExternas}
+              className="rounded-xl bg-blue-600 text-white px-6 py-3"
+            >
+              Importar Airbnb / Booking
+            </button>
+          </div>
+
+          <p className="text-sm text-slate-600">
+            Importa las reservas detectadas en los calendarios iCal de Airbnb y Booking para poder gestionarlas desde el panel.
+          </p>
+        </div>
 
         <div className="rounded-2xl bg-white p-5 border border-slate-200 mb-8">
           <h2 className="text-xl font-semibold mb-4">Crear reserva manual</h2>
