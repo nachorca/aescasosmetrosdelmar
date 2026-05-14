@@ -179,6 +179,12 @@ export default function AdminPage() {
     await cargarDatos();
   }
 
+  function buildWhatsappUrl(row: any) {
+    const message = `Hola, para completar el registro obligatorio de viajeros de tu reserva en A escasos metros del mar, por favor accede al siguiente enlace de Check-in Scan: ${row.checkinscan_url || "ENLACE_CHECKIN_SCAN_PENDIENTE"}`;
+
+    return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  }
+
   const unifiedRows = [
     ...reservas.map((r) => ({
       id: r.id,
@@ -515,11 +521,22 @@ export default function AdminPage() {
                   <td className="p-3">
                     <div className="flex flex-col gap-2">
                       {r.checkinscan_status === "not_sent" ? (
-                        <button
-                          className="rounded-xl bg-blue-600 text-white px-3 py-2 text-sm"
-                        >
-                          Enviar
-                        </button>
+                        <>
+                          <button
+                            className="rounded-xl bg-blue-600 text-white px-3 py-2 text-sm"
+                          >
+                            Enviar
+                          </button>
+
+                          <a
+                            href={buildWhatsappUrl(r)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-xl bg-green-600 text-white px-3 py-2 text-sm text-center"
+                          >
+                            Enviar WhatsApp
+                          </a>
+                        </>
                       ) : r.checkinscan_status === "sent" ? (
                         <span className="rounded-lg bg-amber-100 text-amber-700 px-3 py-2 text-sm">
                           Enviado
