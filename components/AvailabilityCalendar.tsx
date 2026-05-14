@@ -70,13 +70,15 @@ export default function AvailabilityCalendar() {
   useEffect(() => {
     async function loadAvailability() {
       try {
-        const [availabilityRes, reservasRes] = await Promise.all([
+        const [availabilityRes, reservasRes, manualBlocksRes] = await Promise.all([
           fetch("/api/availability"),
           fetch("/api/reservas"),
+          fetch("/api/manual-blocks"),
         ]);
 
         const availabilityData = await availabilityRes.json();
         const reservasData = await reservasRes.json();
+        const manualBlocksData = await manualBlocksRes.json();
 
         const icalBlocked = availabilityData.ok
           ? availabilityData.blocked || []
@@ -91,7 +93,16 @@ export default function AvailabilityCalendar() {
             }))
           : [];
 
-        setBlocked([...icalBlocked, ...reservasBlocked]);
+        const manualBlocked = manualBlocksData.ok
+          ? (manualBlocksData.blocks || []).map((b: any) => ({
+              source: "manual",
+              summary: b.reason || "Bloqueo manual",
+              start: b.start_date,
+              end: b.end_date,
+            }))
+          : [];
+
+        setBlocked([...icalBlocked, ...reservasBlocked, ...manualBlocked]);
       } catch (error) {
         console.error("Error cargando disponibilidad:", error);
       } finally {

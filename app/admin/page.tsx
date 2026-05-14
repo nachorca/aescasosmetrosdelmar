@@ -6,6 +6,9 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [reservas, setReservas] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [blockStart, setBlockStart] = useState("");
+  const [blockEnd, setBlockEnd] = useState("");
+  const [blockReason, setBlockReason] = useState("");
 
   async function cargarReservas() {
     setError("");
@@ -24,6 +27,36 @@ export default function AdminPage() {
     }
 
     setReservas(data.reservas || []);
+  }
+
+  async function crearBloqueoManual() {
+    setError("");
+
+    const res = await fetch("/api/manual-blocks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": password,
+      },
+      body: JSON.stringify({
+        start_date: blockStart,
+        end_date: blockEnd,
+        reason: blockReason,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      setError(data.error || "Error creando bloqueo");
+      return;
+    }
+
+    setBlockStart("");
+    setBlockEnd("");
+    setBlockReason("");
+    await cargarReservas();
+    alert("Bloqueo manual creado correctamente");
   }
 
   return (
@@ -57,6 +90,41 @@ export default function AdminPage() {
           </div>
 
           {error && <p className="text-red-600 mt-3">{error}</p>}
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 border border-slate-200 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Bloquear fechas manualmente</h2>
+
+          <div className="grid md:grid-cols-4 gap-3">
+            <input
+              type="date"
+              value={blockStart}
+              onChange={(e) => setBlockStart(e.target.value)}
+              className="rounded-xl border border-slate-300 px-4 py-3"
+            />
+
+            <input
+              type="date"
+              value={blockEnd}
+              onChange={(e) => setBlockEnd(e.target.value)}
+              className="rounded-xl border border-slate-300 px-4 py-3"
+            />
+
+            <input
+              type="text"
+              value={blockReason}
+              onChange={(e) => setBlockReason(e.target.value)}
+              className="rounded-xl border border-slate-300 px-4 py-3"
+              placeholder="Motivo: mantenimiento, uso personal..."
+            />
+
+            <button
+              onClick={crearBloqueoManual}
+              className="rounded-xl bg-slate-900 text-white px-6 py-3"
+            >
+              Bloquear
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-2xl bg-white border border-slate-200">
