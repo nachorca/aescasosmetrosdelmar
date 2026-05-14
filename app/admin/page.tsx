@@ -53,7 +53,11 @@ export default function AdminPage() {
     const data = await res.json();
 
     if (!data.ok) {
-      setError(data.error || "Error creando bloqueo");
+      setError(
+        data.error?.includes("ocupadas") || data.error?.includes("bloqueadas")
+          ? "⚠️ Overbooking detectado: las fechas seleccionadas se solapan con una reserva o bloqueo existente."
+          : data.error || "Error creando reserva manual"
+      );
       return;
     }
 
@@ -81,7 +85,11 @@ export default function AdminPage() {
     const data = await res.json();
 
     if (!data.ok) {
-      setError(data.error || "Error modificando reserva manual");
+      setError(
+        data.error?.includes("ocupadas") || data.error?.includes("bloqueadas")
+          ? "⚠️ Overbooking detectado: las fechas seleccionadas se solapan con una reserva o bloqueo existente."
+          : data.error || "Error modificando reserva manual"
+      );
       return;
     }
 
@@ -176,6 +184,12 @@ export default function AdminPage() {
         <p className="text-slate-600 mb-8">
           Reservas confirmadas y reservas manuales
         </p>
+
+        {error && (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-100 px-5 py-4 text-red-700 font-medium">
+            {error}
+          </div>
+        )}
 
         <div className="rounded-2xl bg-white p-5 border border-slate-200 mb-8">
           <h2 className="text-xl font-semibold mb-4">Crear reserva manual</h2>

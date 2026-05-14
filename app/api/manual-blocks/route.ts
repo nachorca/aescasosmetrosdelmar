@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { checkAvailability } from "@/lib/checkAvailability";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,6 +31,21 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
+  const availability = await checkAvailability(
+    body.start_date,
+    body.end_date
+  );
+
+  if (!availability.available) {
+    return Response.json(
+      {
+        ok: false,
+        error: availability.reason,
+      },
+      { status: 409 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("manual_blocks")
     .insert({
@@ -54,6 +70,21 @@ export async function PUT(req: Request) {
   }
 
   const body = await req.json();
+
+  const availability = await checkAvailability(
+    body.start_date,
+    body.end_date
+  );
+
+  if (!availability.available) {
+    return Response.json(
+      {
+        ok: false,
+        error: availability.reason,
+      },
+      { status: 409 }
+    );
+  }
 
   const { data, error } = await supabase
     .from("manual_blocks")

@@ -1,10 +1,26 @@
 import Stripe from "stripe";
+import { checkAvailability } from "@/lib/checkAvailability";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    const availability = await checkAvailability(
+      body.checkIn,
+      body.checkOut
+    );
+
+    if (!availability.available) {
+      return Response.json(
+        {
+          ok: false,
+          error: availability.reason,
+        },
+        { status: 409 }
+      );
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

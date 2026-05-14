@@ -60,6 +60,7 @@ export default function AvailabilityCalendar() {
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
   const [guests, setGuests] = useState(2);
+  const [bookingError, setBookingError] = useState("");
 
   const today = new Date();
   const baseMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -159,6 +160,8 @@ export default function AvailabilityCalendar() {
   async function handlePayment() {
     if (!checkIn || !checkOut || !total) return;
 
+    setBookingError("");
+
     const res = await fetch("/api/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -171,6 +174,12 @@ export default function AvailabilityCalendar() {
     });
 
     const data = await res.json();
+
+    if (!data.ok) {
+      setBookingError(data.error || "No disponible");
+      return;
+    }
+
     if (data.ok && data.url) {
       window.location.href = data.url;
     }
@@ -318,6 +327,12 @@ export default function AvailabilityCalendar() {
             <span>{total} €</span>
           </div>
         </div>
+
+        {bookingError && (
+          <div className="mb-4 rounded-2xl bg-red-100 border border-red-200 text-red-700 px-4 py-3 text-sm">
+            {bookingError}
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3">
           <button
