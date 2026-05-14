@@ -198,8 +198,46 @@ export default function Home() {
           </p>
 
           <div className="bg-white rounded-[2rem] p-8 shadow-sm">
-            <div className="border border-dashed border-slate-300 rounded-2xl p-12 text-slate-500 mb-6">
-              Aquí irá el calendario de reservas
+            <div className="rounded-2xl border border-slate-200 p-6 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold">Disponibilidad</h3>
+                <span className="text-sm text-slate-500">Calendario provisional</span>
+              </div>
+
+              <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500">
+                {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+                  <div key={d}>{d}</div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-2 text-sm">
+                {Array.from({ length: 35 }, (_, i) => i + 1).map((day) => {
+                  const blocked = [5, 6, 12, 13, 20, 21, 22].includes(day);
+                  return (
+                    <div
+                      key={day}
+                      className={`rounded-xl p-3 text-center ${
+                        blocked
+                          ? "bg-slate-200 text-slate-400 line-through"
+                          : "bg-emerald-50 text-emerald-700 font-medium"
+                      }`}
+                    >
+                      {day}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-4 justify-center mt-6 text-sm">
+                <span className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-emerald-100 border border-emerald-300"></span>
+                  Disponible
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-slate-200 border border-slate-300"></span>
+                  Ocupado
+                </span>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-4 text-left">
