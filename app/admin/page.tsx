@@ -1,5 +1,7 @@
 "use client";
 
+import AdminCalendar from "@/components/AdminCalendar";
+
 import { useState } from "react";
 
 export default function AdminPage() {
@@ -13,6 +15,7 @@ export default function AdminPage() {
   const [blockStart, setBlockStart] = useState("");
   const [blockEnd, setBlockEnd] = useState("");
   const [blockReason, setBlockReason] = useState("");
+  const [showCalendar, setShowCalendar] = useState(false);
 
   async function cargarDatos() {
     setError("");
@@ -249,6 +252,25 @@ export default function AdminPage() {
               Crear reserva manual
             </button>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold">
+              Calendario visual
+            </h2>
+
+            <button
+              onClick={() => setShowCalendar(!showCalendar)}
+              className="rounded-xl bg-slate-900 text-white px-5 py-3 text-sm"
+            >
+              {showCalendar ? "Ocultar calendario" : "Mostrar calendario"}
+            </button>
+          </div>
+
+          {showCalendar && (
+            <AdminCalendar reservations={unifiedRows} />
+          )}
         </div>
 
         <div className="overflow-x-auto rounded-2xl bg-white border border-slate-200">
