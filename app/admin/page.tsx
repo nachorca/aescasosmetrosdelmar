@@ -140,6 +140,7 @@ export default function AdminPage() {
       stripe: r.stripe_session_id || "-",
       motivo: "-",
       manual: false,
+      external: false,
     })),
     ...externalReservations.map((e, index) => ({
       id: `${e.source}-${e.start}-${e.end}-${index}`,
@@ -174,6 +175,7 @@ export default function AdminPage() {
       stripe: "-",
       motivo: b.reason || "Bloqueo manual",
       manual: true,
+      external: false,
     })),
   ].sort((a, b) => String(a.entrada).localeCompare(String(b.entrada)));
 
