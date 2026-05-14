@@ -124,8 +124,23 @@ export default function Home() {
             Imágenes del apartamento
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {["IMG_9621.jpg", "IMG_9622.jpg", "IMG_9623.jpg"].map((img) => (
+          <div className="grid md:grid-cols-4 gap-5">
+            <div className="md:col-span-2 md:row-span-2 rounded-[2rem] overflow-hidden shadow-lg aspect-[4/3] md:aspect-auto bg-white">
+              <img
+                src="/images/portada.jpg"
+                alt="Apartamento turístico en El Campello"
+                className="w-full h-full object-cover hover:scale-105 transition duration-500"
+              />
+            </div>
+
+            {[
+              "IMG_9621.jpg",
+              "IMG_9622.jpg",
+              "IMG_9623.jpg",
+              "IMG_9624.jpg",
+              "IMG_9625.jpg",
+              "IMG_9626.jpg"
+            ].map((img) => (
               <div key={img} className="rounded-[2rem] overflow-hidden shadow-sm aspect-[4/3] bg-white">
                 <img
                   src={`/images/${img}`}
