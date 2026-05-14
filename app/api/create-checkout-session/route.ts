@@ -26,9 +26,9 @@ export async function POST(req: Request) {
       ],
 
       success_url:
-        "https://aescasosmetrosdelmar.com?payment=success",
+        `${process.env.NEXT_PUBLIC_SITE_URL || "https://aescasosmetrosdelmar.com"}/pago/correcto?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
-        "https://aescasosmetrosdelmar.com?payment=cancel",
+        `${process.env.NEXT_PUBLIC_SITE_URL || "https://aescasosmetrosdelmar.com"}/pago/cancelado`,
 
       metadata: {
         checkIn: body.checkIn || "",
