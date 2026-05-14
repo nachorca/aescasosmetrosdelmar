@@ -63,6 +63,31 @@ export default function AdminPage() {
     await cargarDatos();
   }
 
+  async function actualizarBloqueoManual(row: any) {
+    const res = await fetch("/api/manual-blocks", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": password,
+      },
+      body: JSON.stringify({
+        id: row.id,
+        start_date: row.entrada,
+        end_date: row.salida,
+        reason: row.motivo,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      setError(data.error || "Error modificando reserva manual");
+      return;
+    }
+
+    await cargarDatos();
+  }
+
   async function borrarBloqueo(id: string) {
     if (!confirm("¿Seguro que quieres borrar este bloqueo manual?")) return;
 
@@ -210,22 +235,86 @@ export default function AdminPage() {
               {unifiedRows.map((r) => (
                 <tr key={`${r.tipo}-${r.id}`} className="border-t border-slate-200">
                   <td className="p-3">{r.tipo}</td>
-                  <td className="p-3">{r.entrada}</td>
-                  <td className="p-3">{r.salida}</td>
+                  <td className="p-3">
+                    {r.manual ? (
+                      <input
+                        type="date"
+                        value={r.entrada}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setBlocks((prev) =>
+                            prev.map((b) =>
+                              b.id === r.id ? { ...b, start_date: value } : b
+                            )
+                          );
+                        }}
+                        className="rounded-lg border border-slate-300 px-3 py-2"
+                      />
+                    ) : (
+                      r.entrada
+                    )}
+                  </td>
+
+                  <td className="p-3">
+                    {r.manual ? (
+                      <input
+                        type="date"
+                        value={r.salida}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setBlocks((prev) =>
+                            prev.map((b) =>
+                              b.id === r.id ? { ...b, end_date: value } : b
+                            )
+                          );
+                        }}
+                        className="rounded-lg border border-slate-300 px-3 py-2"
+                      />
+                    ) : (
+                      r.salida
+                    )}
+                  </td>
                   <td className="p-3">{r.huespedes}</td>
                   <td className="p-3">{r.pago}</td>
                   <td className="p-3">{r.estado}</td>
                   <td className="p-3">{r.importe}</td>
                   <td className="p-3">{r.email}</td>
-                  <td className="p-3">{r.motivo}</td>
                   <td className="p-3">
                     {r.manual ? (
-                      <button
-                        onClick={() => borrarBloqueo(r.id)}
-                        className="rounded-lg bg-red-600 text-white px-4 py-2"
-                      >
-                        Borrar
-                      </button>
+                      <input
+                        type="text"
+                        value={r.motivo}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setBlocks((prev) =>
+                            prev.map((b) =>
+                              b.id === r.id ? { ...b, reason: value } : b
+                            )
+                          );
+                        }}
+                        className="rounded-lg border border-slate-300 px-3 py-2 w-full"
+                      />
+                    ) : (
+                      r.motivo
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {r.manual ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => actualizarBloqueoManual(r)}
+                          className="rounded-lg bg-slate-900 text-white px-4 py-2"
+                        >
+                          Guardar
+                        </button>
+
+                        <button
+                          onClick={() => borrarBloqueo(r.id)}
+                          className="rounded-lg bg-red-600 text-white px-4 py-2"
+                        >
+                          Borrar
+                        </button>
+                      </div>
                     ) : (
                       <span className="text-slate-400">Stripe</span>
                     )}
