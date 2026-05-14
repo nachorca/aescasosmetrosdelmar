@@ -161,6 +161,8 @@ export default function AdminPage() {
       estado: r.status,
       checkin_status: r.checkin_status || "pending",
       cleaning_status: r.cleaning_status || "pending",
+      original_checkin_status: r.checkin_status || "pending",
+      original_cleaning_status: r.cleaning_status || "pending",
       importe: r.amount_total ? `${r.amount_total / 100} €` : "-",
       email: r.customer_email || "-",
       stripe: r.stripe_session_id || "-",
@@ -183,6 +185,8 @@ export default function AdminPage() {
       estado: e.status || "confirmed",
       checkin_status: e.checkin_status || "pending",
       cleaning_status: e.cleaning_status || "pending",
+      original_checkin_status: e.checkin_status || "pending",
+      original_cleaning_status: e.cleaning_status || "pending",
       importe: e.amount_total ? `${e.amount_total / 100} €` : "-",
       email: e.guest_email || "-",
       stripe: "-",
@@ -200,6 +204,8 @@ export default function AdminPage() {
       estado: "confirmed",
       checkin_status: b.checkin_status || "pending",
       cleaning_status: b.cleaning_status || "pending",
+      original_checkin_status: b.checkin_status || "pending",
+      original_cleaning_status: b.cleaning_status || "pending",
       importe: "-",
       email: "-",
       stripe: "-",
@@ -425,6 +431,21 @@ export default function AdminPage() {
                       <option value="cleaning">Limpiando</option>
                       <option value="ready">Listo</option>
                     </select>
+                  </td>
+
+                  <td className="p-3">
+                    <button
+                      onClick={() =>
+                        actualizarEstadoOperativo(
+                          r,
+                          "checkin_status",
+                          r.checkin_status
+                        )
+                      }
+                      className="rounded-xl bg-slate-900 text-white px-4 py-2 text-sm"
+                    >
+                      Guardar estado
+                    </button>
                   </td>
 
                   <td className="p-3">{r.importe}</td>
