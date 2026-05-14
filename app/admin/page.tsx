@@ -7,6 +7,7 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [reservas, setReservas] = useState<any[]>([]);
   const [blocks, setBlocks] = useState<any[]>([]);
+  const [externalReservations, setExternalReservations] = useState<any[]>([]);
   const [error, setError] = useState("");
 
   const [blockStart, setBlockStart] = useState("");
@@ -31,8 +32,12 @@ export default function AdminPage() {
     const blocksRes = await fetch("/api/manual-blocks");
     const blocksData = await blocksRes.json();
 
+    const externalRes = await fetch("/api/availability");
+    const externalData = await externalRes.json();
+
     setReservas(reservasData.reservas || []);
     setBlocks(blocksData.blocks || []);
+    setExternalReservations(externalData.ok ? externalData.blocked || [] : []);
     setIsAdmin(true);
   }
 
@@ -132,6 +137,26 @@ export default function AdminPage() {
       stripe: r.stripe_session_id || "-",
       motivo: "-",
       manual: false,
+    })),
+    ...externalReservations.map((e, index) => ({
+      id: `${e.source}-${e.start}-${e.end}-${index}`,
+      tipo:
+        e.source === "airbnb"
+          ? "Reserva Airbnb"
+          : e.source === "booking"
+          ? "Reserva Booking"
+          : "Reserva externa",
+      entrada: e.start,
+      salida: e.end,
+      huespedes: "-",
+      pago: "-",
+      estado: "confirmed",
+      importe: "-",
+      email: "-",
+      stripe: "-",
+      motivo: e.summary || "Reserva externa",
+      manual: false,
+      external: true,
     })),
     ...blocks.map((b) => ({
       id: b.id,
@@ -329,6 +354,8 @@ export default function AdminPage() {
                           Borrar
                         </button>
                       </div>
+                    ) : r.external ? (
+                      <span className="text-slate-400">Externa</span>
                     ) : (
                       <span className="text-slate-400">Stripe</span>
                     )}
