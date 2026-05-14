@@ -39,6 +39,7 @@ export default function AvailabilityCalendar() {
   const [loading, setLoading] = useState(true);
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
+  const [guests, setGuests] = useState(2);
 
   const today = new Date();
   const year = today.getFullYear();
@@ -80,6 +81,11 @@ export default function AvailabilityCalendar() {
   }
 
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
+
+  const pricePerNight = 130;
+  const cleaningFee = 45;
+  const subtotal = nights * pricePerNight;
+  const total = nights ? subtotal + cleaningFee : 0;
 
   const whatsappText = encodeURIComponent(
     `Hola, quiero consultar disponibilidad para el apartamento A escasos metros del mar.\n\nEntrada: ${checkIn || "-"}\nSalida: ${checkOut || "-"}\nNoches: ${nights || "-"}`
@@ -146,20 +152,58 @@ export default function AvailabilityCalendar() {
         </span>
       </div>
 
-      <div className="mt-8 rounded-2xl bg-[#f7f4ee] p-5 text-left">
-        <h4 className="font-semibold mb-3">Solicitud de reserva</h4>
-        <div className="grid md:grid-cols-3 gap-4 text-sm text-slate-700 mb-5">
+      <div className="mt-8 rounded-2xl bg-[#f7f4ee] p-6 text-left">
+        <h4 className="font-semibold mb-5 text-xl">
+          Solicitud de reserva
+        </h4>
+
+        <div className="grid md:grid-cols-4 gap-4 text-sm text-slate-700 mb-6">
           <div>
-            <p className="text-slate-500">Entrada</p>
+            <p className="text-slate-500 mb-1">Entrada</p>
             <p className="font-medium">{checkIn || "Seleccionar"}</p>
           </div>
+
           <div>
-            <p className="text-slate-500">Salida</p>
+            <p className="text-slate-500 mb-1">Salida</p>
             <p className="font-medium">{checkOut || "Seleccionar"}</p>
           </div>
+
           <div>
-            <p className="text-slate-500">Noches</p>
+            <p className="text-slate-500 mb-1">Noches</p>
             <p className="font-medium">{nights || "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-slate-500 mb-1">Huéspedes</p>
+
+            <select
+              value={guests}
+              onChange={(e) => setGuests(Number(e.target.value))}
+              className="rounded-xl border border-slate-300 px-3 py-2 bg-white"
+            >
+              {[1,2,3,4,5,6].map((g) => (
+                <option key={g} value={g}>
+                  {g} huésped{g > 1 ? "es" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 mb-6 border border-slate-200">
+          <div className="flex justify-between mb-2">
+            <span>{pricePerNight} € × {nights} noches</span>
+            <span>{subtotal} €</span>
+          </div>
+
+          <div className="flex justify-between mb-2">
+            <span>Limpieza</span>
+            <span>{cleaningFee} €</span>
+          </div>
+
+          <div className="border-t border-slate-200 pt-3 mt-3 flex justify-between font-semibold text-lg">
+            <span>Total estimado</span>
+            <span>{total} €</span>
           </div>
         </div>
 
