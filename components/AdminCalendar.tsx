@@ -78,6 +78,10 @@ export default function AdminCalendar({
     setCurrentMonth(new Date(year, month + 1, 1));
   }
 
+  function goToday() {
+    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+  }
+
   function getReservation(dateKey: string) {
     return reservations.find((r) => overlaps(dateKey, r.entrada, r.salida));
   }
@@ -91,19 +95,13 @@ export default function AdminCalendar({
         "Content-Type": "application/json",
         "x-admin-password": adminPassword,
       },
-      body: JSON.stringify({
-        date,
-        price,
-      }),
+      body: JSON.stringify({ date, price }),
     });
 
     const data = await res.json();
 
     if (data.ok) {
-      setPrices((prev) => ({
-        ...prev,
-        [date]: price,
-      }));
+      setPrices((prev) => ({ ...prev, [date]: price }));
     } else {
       alert(data.error || "No se pudo guardar el precio");
     }
@@ -113,88 +111,99 @@ export default function AdminCalendar({
 
   return (
     <div className="rounded-3xl bg-white border border-slate-200 p-5">
-      <div className="flex items-center justify-between mb-5">
-        <button
-          type="button"
-          onClick={prevMonth}
-          className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-100"
-        >
-          ←
-        </button>
+      <div className="sticky top-0 z-10 bg-white pb-4 mb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={prevMonth}
+            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-100"
+          >
+            ← Mes anterior
+          </button>
 
-        <h3 className="text-xl font-semibold capitalize">{monthName}</h3>
-
-        <button
-          type="button"
-          onClick={nextMonth}
-          className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-100"
-        >
-          →
-        </button>
-      </div>
-
-      <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500">
-        {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-          <div key={d}>{d}</div>
-        ))}
-      </div>
-
-      <div className="max-h-[650px] overflow-y-auto pr-2">
-        <div className="grid grid-cols-7 gap-2 text-sm">
-        {Array.from({ length: startOffset }).map((_, i) => (
-          <div key={`empty-${i}`} className="min-h-[120px]" />
-        ))}
-
-        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-          const dateKey = toDateKey(new Date(year, month, day));
-          const reservation = getReservation(dateKey);
-          const price = prices[dateKey] ?? 130;
-
-          return (
-            <div
-              key={dateKey}
-              className={`rounded-2xl p-3 min-h-[125px] border ${
-                reservation
-                  ? `${getColor(reservation.tipo)} border-transparent`
-                  : "bg-slate-50 border-slate-200"
-              }`}
+          <div className="text-center">
+            <h3 className="text-xl font-semibold capitalize">{monthName}</h3>
+            <button
+              type="button"
+              onClick={goToday}
+              className="text-xs text-slate-500 hover:text-slate-900 mt-1"
             >
-              <div className="font-semibold mb-2">{day}</div>
+              Volver al mes actual
+            </button>
+          </div>
 
-              {reservation ? (
-                <div className="text-xs mb-2">
-                  <div className="font-medium">{reservation.tipo}</div>
-                  <div className="opacity-90 mt-1">
-                    {reservation.entrada} → {reservation.salida}
+          <button
+            type="button"
+            onClick={nextMonth}
+            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-100"
+          >
+            Mes siguiente →
+          </button>
+        </div>
+      </div>
+
+      <div className="max-h-[720px] overflow-y-auto pr-2">
+        <div className="grid grid-cols-7 gap-2 text-sm text-center mb-3 text-slate-500 sticky top-0 bg-white z-10 py-2">
+          {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+            <div key={d}>{d}</div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-2 text-sm">
+          {Array.from({ length: startOffset }).map((_, i) => (
+            <div key={`empty-${i}`} className="min-h-[130px]" />
+          ))}
+
+          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+            const dateKey = toDateKey(new Date(year, month, day));
+            const reservation = getReservation(dateKey);
+            const price = prices[dateKey] ?? 130;
+
+            return (
+              <div
+                key={dateKey}
+                className={`rounded-2xl p-3 min-h-[130px] border ${
+                  reservation
+                    ? `${getColor(reservation.tipo)} border-transparent`
+                    : "bg-slate-50 border-slate-200"
+                }`}
+              >
+                <div className="font-semibold mb-2">{day}</div>
+
+                {reservation ? (
+                  <div className="text-xs mb-2">
+                    <div className="font-medium">{reservation.tipo}</div>
+                    <div className="opacity-90 mt-1">
+                      {reservation.entrada} → {reservation.salida}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-xs text-slate-400 mb-2">Disponible</div>
-              )}
-
-              <div className="mt-2">
-                <label className="block text-[11px] mb-1 opacity-80">
-                  Precio noche
-                </label>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) =>
-                    setPrices((prev) => ({
-                      ...prev,
-                      [dateKey]: Number(e.target.value),
-                    }))
-                  }
-                  onBlur={(e) => savePrice(dateKey, Number(e.target.value))}
-                  className="w-full rounded-lg border border-slate-300 px-2 py-1 text-slate-900"
-                />
-                {savingDate === dateKey && (
-                  <p className="text-[11px] mt-1">Guardando...</p>
+                ) : (
+                  <div className="text-xs text-slate-400 mb-2">Disponible</div>
                 )}
+
+                <div className="mt-2">
+                  <label className="block text-[11px] mb-1 opacity-80">
+                    Precio noche
+                  </label>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) =>
+                      setPrices((prev) => ({
+                        ...prev,
+                        [dateKey]: Number(e.target.value),
+                      }))
+                    }
+                    onBlur={(e) => savePrice(dateKey, Number(e.target.value))}
+                    className="w-full rounded-lg border border-slate-300 px-2 py-1 text-slate-900"
+                  />
+                  {savingDate === dateKey && (
+                    <p className="text-[11px] mt-1">Guardando...</p>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       </div>
     </div>
