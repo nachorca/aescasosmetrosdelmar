@@ -15,6 +15,7 @@ export default function AdminPage() {
   const [blockStart, setBlockStart] = useState("");
   const [blockEnd, setBlockEnd] = useState("");
   const [blockReason, setBlockReason] = useState("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showCalendar, setShowCalendar] = useState(false);
 
   async function importarReservasExternas() {
@@ -200,7 +201,11 @@ export default function AdminPage() {
       manual: true,
       external: false,
     })),
-  ].sort((a, b) => String(a.entrada).localeCompare(String(b.entrada)));
+  ].sort((a, b) =>
+    sortDirection === "asc"
+      ? String(a.entrada).localeCompare(String(b.entrada))
+      : String(b.entrada).localeCompare(String(a.entrada))
+  );
 
   if (!isAdmin) {
     return (
@@ -316,7 +321,18 @@ export default function AdminPage() {
         </div>
 
         <div className="overflow-x-auto rounded-2xl bg-white border border-slate-200">
-          <h2 className="text-xl font-semibold p-5">Reservas</h2>
+          <div className="flex items-center justify-between p-5">
+            <h2 className="text-xl font-semibold">Reservas</h2>
+
+            <button
+              onClick={() =>
+                setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+              }
+              className="rounded-xl bg-slate-900 text-white px-5 py-2 text-sm"
+            >
+              Ordenar por fecha {sortDirection === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
 
           <table className="w-full text-sm">
             <thead className="bg-slate-100 text-left">
