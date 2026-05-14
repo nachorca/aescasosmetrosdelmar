@@ -14,6 +14,7 @@ export default function Home() {
             <a href="#ubicacion" className="hover:text-white">Ubicación</a>
             <a href="#galeria" className="hover:text-white">Galería</a>
             <a href="#reservar" className="hover:text-white">Reservar</a>
+            <a href="/admin" className="hover:text-white">Admin</a>
           </nav>
 
           <a
