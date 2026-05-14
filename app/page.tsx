@@ -1,5 +1,6 @@
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import HeroCarousel from "@/components/HeroCarousel";
+import GalleryGrid from "@/components/GalleryGrid";
 
 export default function Home() {
   return (
@@ -97,97 +98,7 @@ export default function Home() {
             Servicios del apartamento
           </h2>
 
-          <div className="grid md:grid-cols-4 gap-5">
-            {[
-              "Aire acondicionado",
-              "WiFi",
-              "Cocina equipada",
-              "Lavadora",
-              "Televisión",
-              "Ropa de cama",
-              "Toallas",
-              "Cerca de la playa",
-              "Paseo marítimo",
-              "Máximo 4 huéspedes",
-              "Pago seguro",
-              "Check-in organizado",
-              "Check-in flexible",
-            ].map((service) => (
-              <div key={service} className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100">
-                <p className="font-medium text-slate-800">✓ {service}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="apartamento" className="px-6 py-24 bg-white">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          <div className="rounded-[2rem] bg-[#e8e1d6] aspect-[4/3] flex items-center justify-center text-slate-500">
-            Aquí irá la foto principal del apartamento
-          </div>
-
-          <div>
-            <p className="uppercase tracking-[0.3em] text-slate-500 mb-4">
-              El apartamento
-            </p>
-            <h2 className="text-4xl md:text-5xl font-semibold mb-6">
-              Una estancia tranquila en el paseo marítimo
-            </h2>
-            <p className="text-lg text-slate-700 mb-6">
-              Un espacio cómodo, luminoso y bien ubicado para disfrutar de El Campello, Alicante y el Mediterráneo.
-            </p>
-            <ul className="space-y-3 text-slate-700">
-              <li>✓ Cerca de la playa</li>
-              <li>✓ Buena conexión con Alicante</li>
-              <li>✓ Ideal para vacaciones y estancias temporales</li>
-              <li>✓ Licencia turística y NRA</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section id="galeria" className="px-6 py-24 bg-[#f7f4ee]">
-        <div className="max-w-6xl mx-auto">
-          <p className="uppercase tracking-[0.3em] text-slate-500 mb-4">
-            Galería
-          </p>
-          <h2 className="text-4xl md:text-5xl font-semibold mb-10">
-            Imágenes del apartamento
-          </h2>
-
-          <div className="grid md:grid-cols-4 gap-5">
-            <div className="md:col-span-2 md:row-span-2 rounded-[2rem] overflow-hidden shadow-lg aspect-[4/3] md:aspect-auto bg-white">
-              <img
-                src="/images/portada.jpg"
-                alt="Apartamento turístico en El Campello"
-                className="w-full h-full object-cover hover:scale-105 transition duration-500"
-              />
-            </div>
-
-            {[
-              "IMG_9621.jpg",
-              "IMG_9622.jpg",
-              "IMG_9623.jpg",
-              "IMG_9624.jpg",
-              "IMG_9625.jpg",
-              "IMG_9626.jpg",
-              "IMG_9627.jpg",
-              "IMG_9628.jpg",
-              "PHOTO-2024-06-17-21-07-17 3.jpg",
-              "PHOTO-2024-06-17-21-07-17 4.jpg",
-              "WhatsApp Image 2024-08-25 at 16.29.30.jpeg",
-              "WhatsApp Image 2024-08-25 at 16.29.31.jpeg"
-            ].map((img) => (
-              <div key={img} className="rounded-[2rem] overflow-hidden shadow-sm aspect-[4/3] bg-white">
-                <img
-                  src={`/images/${img}`}
-                  alt="Apartamento en El Campello"
-                  className="w-full h-full object-cover hover:scale-105 transition duration-500"
-                />
-              </div>
-            ))}
-          </div>
+          <GalleryGrid />
         </div>
       </section>
 
