@@ -328,7 +328,7 @@ export default function AdminPage() {
 
         <div className="overflow-x-auto rounded-2xl bg-white border border-slate-200">
           <div className="flex items-center justify-between p-5">
-            <h2 className="text-xl font-semibold">Reservas</h2>
+            <h2 className="text-xl font-semibold">Reservas operativas</h2>
 
             <button
               onClick={() =>
