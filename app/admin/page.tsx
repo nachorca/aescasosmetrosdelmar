@@ -159,6 +159,8 @@ export default function AdminPage() {
       huespedes: r.guests,
       pago: r.payment_status,
       estado: r.status,
+      checkin_status: r.checkin_status || "pending",
+      cleaning_status: r.cleaning_status || "pending",
       importe: r.amount_total ? `${r.amount_total / 100} €` : "-",
       email: r.customer_email || "-",
       stripe: r.stripe_session_id || "-",
@@ -179,6 +181,8 @@ export default function AdminPage() {
       huespedes: e.guests || "-",
       pago: "-",
       estado: e.status || "confirmed",
+      checkin_status: e.checkin_status || "pending",
+      cleaning_status: e.cleaning_status || "pending",
       importe: e.amount_total ? `${e.amount_total / 100} €` : "-",
       email: e.guest_email || "-",
       stripe: "-",
@@ -194,6 +198,8 @@ export default function AdminPage() {
       huespedes: "-",
       pago: "-",
       estado: "confirmed",
+      checkin_status: b.checkin_status || "pending",
+      cleaning_status: b.cleaning_status || "pending",
       importe: "-",
       email: "-",
       stripe: "-",
@@ -343,6 +349,8 @@ export default function AdminPage() {
                 <th className="p-3">Huéspedes</th>
                 <th className="p-3">Pago</th>
                 <th className="p-3">Estado</th>
+                <th className="p-3">Check-in</th>
+                <th className="p-3">Limpieza</th>
                 <th className="p-3">Importe</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Motivo</th>
@@ -396,6 +404,29 @@ export default function AdminPage() {
                   <td className="p-3">{r.huespedes}</td>
                   <td className="p-3">{r.pago}</td>
                   <td className="p-3">{r.estado}</td>
+
+                  <td className="p-3">
+                    <select
+                      defaultValue={r.checkin_status}
+                      className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                    >
+                      <option value="pending">Pendiente</option>
+                      <option value="checkin_done">Check-in realizado</option>
+                      <option value="checkout_done">Check-out realizado</option>
+                    </select>
+                  </td>
+
+                  <td className="p-3">
+                    <select
+                      defaultValue={r.cleaning_status}
+                      className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                    >
+                      <option value="pending">Pendiente</option>
+                      <option value="cleaning">Limpiando</option>
+                      <option value="ready">Listo</option>
+                    </select>
+                  </td>
+
                   <td className="p-3">{r.importe}</td>
                   <td className="p-3">{r.email}</td>
                   <td className="p-3">
