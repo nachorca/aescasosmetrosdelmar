@@ -139,7 +139,8 @@ export default function AdminCalendar({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-2 text-sm">
+      <div className="max-h-[650px] overflow-y-auto pr-2">
+        <div className="grid grid-cols-7 gap-2 text-sm">
         {Array.from({ length: startOffset }).map((_, i) => (
           <div key={`empty-${i}`} className="min-h-[120px]" />
         ))}
@@ -194,6 +195,7 @@ export default function AdminCalendar({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
