@@ -61,6 +61,7 @@ export default function AvailabilityCalendar() {
   const [checkOut, setCheckOut] = useState<string | null>(null);
   const [guests, setGuests] = useState(2);
   const [bookingError, setBookingError] = useState("");
+  const [dailyPrices, setDailyPrices] = useState<Record<string, number>>({});
 
   const today = new Date();
   const baseMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -75,11 +76,13 @@ export default function AvailabilityCalendar() {
           fetch("/api/availability"),
           fetch("/api/reservas"),
           fetch("/api/manual-blocks"),
+          fetch("/api/prices"),
         ]);
 
         const availabilityData = await availabilityRes.json();
         const reservasData = await reservasRes.json();
         const manualBlocksData = await manualBlocksRes.json();
+        const pricesData = await pricesRes.json();
 
         const icalBlocked = availabilityData.ok
           ? availabilityData.blocked || []
@@ -104,6 +107,14 @@ export default function AvailabilityCalendar() {
           : [];
 
         setBlocked([...icalBlocked, ...reservasBlocked, ...manualBlocked]);
+
+        if (pricesData.ok) {
+          const map: Record<string, number> = {};
+          (pricesData.prices || []).forEach((p: any) => {
+            map[p.date] = p.price;
+          });
+          setDailyPrices(map);
+        }
       } catch (error) {
         console.error("Error cargando disponibilidad:", error);
       } finally {
@@ -154,7 +165,26 @@ export default function AvailabilityCalendar() {
 
   const pricePerNight = 130;
   const cleaningFee = 75;
-  const subtotal = nights * pricePerNight;
+
+  function getNightPrice(dateKey: string) {
+    return dailyPrices[dateKey] ?? pricePerNight;
+  }
+
+  function calculateSubtotal() {
+    if (!checkIn || !checkOut) return 0;
+
+    let total = 0;
+    const start = new Date(checkIn + "T00:00:00");
+    const end = new Date(checkOut + "T00:00:00");
+
+    for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+      total += getNightPrice(toDateKey(d));
+    }
+
+    return total;
+  }
+
+  const subtotal = calculateSubtotal();
   const total = nights ? subtotal + cleaningFee : 0;
 
   async function handlePayment() {
@@ -254,7 +284,12 @@ export default function AvailabilityCalendar() {
                           : "bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100"
                       }`}
                     >
-                      {day}
+                      <span className="block">{day}</span>
+                      {!isBlocked && (
+                        <span className="block text-[11px] mt-1 opacity-80">
+                          {getNightPrice(dateKey)} €
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -313,7 +348,7 @@ export default function AvailabilityCalendar() {
 
         <div className="rounded-2xl bg-white p-5 mb-6 border border-slate-200">
           <div className="flex justify-between mb-2">
-            <span>{pricePerNight} € × {nights} noches</span>
+            <span>Precio estancia × {nights} noches</span>
             <span>{subtotal} €</span>
           </div>
 
