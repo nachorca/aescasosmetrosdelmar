@@ -73,6 +73,22 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="px-6 py-16 bg-[#f7f4ee]">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-4">
+          {[
+            ["Playa", "A escasos metros del mar"],
+            ["Ubicación", "Paseo marítimo de El Campello"],
+            ["Conexión", "TRAM y Alicante cerca"],
+            ["Reserva", "Pago seguro y disponibilidad"]
+          ].map(([title, text]) => (
+            <div key={title} className="bg-white rounded-3xl p-6 shadow-sm text-center">
+              <p className="text-sm uppercase tracking-[0.25em] text-slate-400 mb-2">{title}</p>
+              <p className="font-medium text-slate-800">{text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section id="apartamento" className="px-6 py-24 bg-white">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div className="rounded-[2rem] bg-[#e8e1d6] aspect-[4/3] flex items-center justify-center text-slate-500">
@@ -161,8 +177,23 @@ export default function Home() {
           </p>
 
           <div className="bg-white rounded-[2rem] p-8 shadow-sm">
-            <div className="border border-dashed border-slate-300 rounded-2xl p-12 text-slate-500">
+            <div className="border border-dashed border-slate-300 rounded-2xl p-12 text-slate-500 mb-6">
               Aquí irá el calendario de reservas
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4 text-left">
+              <div className="rounded-2xl bg-[#f7f4ee] p-5">
+                <h3 className="font-semibold mb-2">Pago seguro</h3>
+                <p className="text-sm text-slate-600">Reserva directa con pasarela segura.</p>
+              </div>
+              <div className="rounded-2xl bg-[#f7f4ee] p-5">
+                <h3 className="font-semibold mb-2">Tarjeta de garantía</h3>
+                <p className="text-sm text-slate-600">Sin guardar números de tarjeta manualmente.</p>
+              </div>
+              <div className="rounded-2xl bg-[#f7f4ee] p-5">
+                <h3 className="font-semibold mb-2">Calendario sincronizado</h3>
+                <p className="text-sm text-slate-600">Preparado para Booking y Airbnb.</p>
+              </div>
             </div>
           </div>
         </div>
