@@ -15,6 +15,8 @@ export default function AdminPage() {
   const [blockStart, setBlockStart] = useState("");
   const [blockEnd, setBlockEnd] = useState("");
   const [blockReason, setBlockReason] = useState("");
+  const [weeklyDiscount, setWeeklyDiscount] = useState(0);
+  const [monthlyDiscount, setMonthlyDiscount] = useState(0);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -112,7 +114,10 @@ export default function AdminPage() {
       return;
     }
 
+    const pricingRulesRes = await fetch("/api/pricing-rules");
+
     const blocksRes = await fetch("/api/manual-blocks");
+    const pricingRulesData = await pricingRulesRes.json();
     const blocksData = await blocksRes.json();
 
     const externalRes = await fetch("/api/admin/external-reservations", {
@@ -122,6 +127,11 @@ export default function AdminPage() {
 
     setReservas(reservasData.reservas || []);
     setBlocks(blocksData.blocks || []);
+
+    if (pricingRulesData.ok) {
+      setWeeklyDiscount(pricingRulesData.rules.weekly_discount || 0);
+      setMonthlyDiscount(pricingRulesData.rules.monthly_discount || 0);
+    }
     setExternalReservations(externalData.ok ? externalData.reservas || [] : []);
     setIsAdmin(true);
   }
@@ -349,6 +359,64 @@ export default function AdminPage() {
           <p className="text-sm text-slate-600">
             Importa las reservas detectadas en los calendarios iCal de Airbnb y Booking para poder gestionarlas desde el panel.
           </p>
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 border border-slate-200 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Descuentos por estancia</h2>
+
+          <div className="grid md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label className="block text-sm text-slate-600 mb-1">
+                Descuento 7 noches o más (%)
+              </label>
+              <input
+                type="number"
+                value={weeklyDiscount}
+                onChange={(e) => setWeeklyDiscount(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-600 mb-1">
+                Descuento 28 noches o más (%)
+              </label>
+              <input
+                type="number"
+                value={monthlyDiscount}
+                onChange={(e) => setMonthlyDiscount(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </div>
+
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/pricing-rules", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "x-admin-password": password,
+                  },
+                  body: JSON.stringify({
+                    weekly_discount: weeklyDiscount,
+                    monthly_discount: monthlyDiscount,
+                  }),
+                });
+
+                const data = await res.json();
+
+                if (!data.ok) {
+                  setError(data.error || "Error guardando descuentos");
+                  return;
+                }
+
+                await cargarDatos();
+              }}
+              className="rounded-xl bg-slate-900 text-white px-6 py-3"
+            >
+              Guardar descuentos
+            </button>
+          </div>
         </div>
 
         <div className="rounded-2xl bg-white p-5 border border-slate-200 mb-8">
